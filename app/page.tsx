@@ -1,4 +1,3 @@
-// app/page.tsx
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "./api/auth/[...nextauth]/route";

@@ -13,18 +13,68 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  password      String
-  name          String?
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-}
-
 enum Role {
   ADMIN
   STAFF
   USER
+}
+
+enum TransmissionType {
+  AUTOMATIC
+  MANUAL
+}
+
+enum DriveType {
+  FWD
+  RWD
+  AWD
+}
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  password      String
+  name          String?
+  role          Role         @default(USER)
+  reservations  Reservation[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Car {
+  id              String          @id @default(cuid())
+  make            String
+  model           String
+  year            Int
+  color           String
+  transmission    TransmissionType
+  driveType       DriveType
+  fuelEfficiency  Int             @map("fuel_efficiency")
+  pricePerDay     Decimal         @map("price_per_day")
+  imageUrl        String?         @map("image_url")
+  isAvailable     Boolean         @default(true)
+  reservations    Reservation[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Reservation {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id])
+  carId         String
+  car           Car       @relation(fields: [carId], references: [id])
+  startDate     DateTime
+  endDate       DateTime
+  totalPrice    Decimal
+  status        ReservationStatus @default(PENDING)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
 }
