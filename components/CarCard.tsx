@@ -1,24 +1,51 @@
-import Image from "next/image";
-import Link from "next/link";
-import { Car } from "@prisma/client";
+"use client";
 
-export default function CarCard({ car }: { car: Car }) {
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+
+type CarCardProps = {
+  car: {
+    id: string;
+    make: string;
+    model: string;
+    year: number;
+    transmission: string;
+    pricePerDay: string;
+    imageUrl: string | null;
+  };
+  showReserveButton?: boolean;
+  currentDate?: string;
+};
+
+export default function CarCard({
+  car,
+  showReserveButton = true,
+  currentDate,
+}: CarCardProps) {
+  const router = useRouter();
+
   return (
-    <div className="bg-white rounded-x1 shadow-sm hover:shadow-md transition overflow-hidden group">
-      <div className="relative h-48 bg-gray-100 group-hover:bg-gray-200 transition">
+    <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {/* Car Image */}
+      <div className="relative h-48 bg-gray-100">
         <Image
           src={car.imageUrl || "/placeholder-car.png"}
           alt={`${car.make} ${car.model}`}
           fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           style={{ objectFit: "contain" }}
+          className="p-2" // Added padding to the image
         />
       </div>
+
+      {/* Car Details */}
       <div className="p-6">
-        <h3 className="text-xl font-semibold mb-2">
+        {/* Car Title */}
+        <h3 className="text-xl font-semibold mb-3">
           {car.make} {car.model}
         </h3>
-        <div className="flex items-center gap-4 mb-4">
+
+        {/* Car Specs */}
+        <div className="flex items-center gap-4 mb-3">
           <span className="inline-flex items-center text-sm text-gray-600">
             <svg
               className="w-5 h-5 mr-1"
@@ -52,16 +79,27 @@ export default function CarCard({ car }: { car: Car }) {
             {car.transmission}
           </span>
         </div>
-        <div className="flex justify-between items-center">
+
+        {/* Current Date if provided */}
+        {currentDate && (
+          <div className="mb-3">
+            <p className="text-sm text-gray-600">Date: {currentDate}</p>
+          </div>
+        )}
+
+        {/* Price and Reserve Button */}
+        <div className="flex justify-between items-center mt-4">
           <span className="text-lg font-bold text-blue-600">
             ${Number(car.pricePerDay).toFixed(2)}/day
           </span>
-          <Link
-            href={`/cars/${car.id}`}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 transition"
-          >
-            View Details
-          </Link>
+          {showReserveButton && (
+            <button
+              onClick={() => router.push(`/cars/${car.id}`)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm hover:bg-blue-700 transition-colors"
+            >
+              Reserve Now
+            </button>
+          )}
         </div>
       </div>
     </div>

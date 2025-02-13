@@ -1,4 +1,4 @@
-import { TransmissionType } from "@prisma/client";
+import { Car, Reservation, TransmissionType } from "@prisma/client";
 
 export enum Role {
   ADMIN = "ADMIN",

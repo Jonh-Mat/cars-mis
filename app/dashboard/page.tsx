@@ -216,8 +216,19 @@ export default async function DashboardPage({
 
           <Suspense fallback={<Loading />}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {cars.map((car: Car) => (
-                <CarCard key={car.id} car={car} />
+              {cars.map((car) => (
+                <CarCard
+                  key={car.id}
+                  car={{
+                    id: car.id,
+                    make: car.make,
+                    model: car.model,
+                    year: car.year,
+                    transmission: car.transmission,
+                    pricePerDay: car.pricePerDay.toString(), // Convert Decimal to string here
+                    imageUrl: car.imageUrl,
+                  }}
+                />
               ))}
             </div>
 
