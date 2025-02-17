@@ -31,7 +31,6 @@ async function getCars(searchParams: SearchParamsType) {
     parseSearchParams(searchParams);
 
   const where: Prisma.CarWhereInput = {
-    isAvailable: true,
     ...(make && {
       make: {
         contains: make,
@@ -57,20 +56,73 @@ async function getCars(searchParams: SearchParamsType) {
   const skip = (page - 1) * limit;
 
   try {
-    const [cars, total] = await Promise.all([
+    // Get cars with their recent reservations
+    const [carsWithReservations, total] = await Promise.all([
       prisma.car.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
+        include: {
+          reservations: {
+            where: {
+              OR: [
+                { status: "CONFIRMED" },
+                {
+                  AND: [
+                    { status: "PENDING" },
+                    {
+                      createdAt: {
+                        gte: new Date(Date.now() - 30 * 60 * 1000), // Last 30 minutes
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            select: {
+              status: true,
+              createdAt: true,
+              startDate: true,
+              endDate: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+        },
       }),
       prisma.car.count({ where }),
     ]);
 
+    // Filter out cars that are currently reserved or in pending state
+    const availableCars = carsWithReservations.filter((car) => {
+      const hasConfirmedReservation = car.reservations.some(
+        (res) => res.status === "CONFIRMED"
+      );
+
+      const hasPendingReservation = car.reservations.some((res) => {
+        if (res.status === "PENDING") {
+          const minutesAgo =
+            (new Date().getTime() - new Date(res.createdAt).getTime()) /
+            1000 /
+            60;
+          return minutesAgo < 30;
+        }
+        return false;
+      });
+
+      return !hasConfirmedReservation && !hasPendingReservation;
+    });
+
     return {
-      cars,
-      total,
-      pages: Math.ceil(total / limit),
+      cars: availableCars.map((car) => ({
+        ...car,
+        isAvailable: true, // These cars are definitely available after filtering
+        reservations: car.reservations, // Include reservations for UI state management
+      })),
+      total: availableCars.length, // Update total count to reflect actually available cars
+      pages: Math.ceil(availableCars.length / limit),
     };
   } catch (error) {
     console.error("Error fetching cars:", error);
@@ -81,7 +133,6 @@ async function getCars(searchParams: SearchParamsType) {
     };
   }
 }
-
 type DashboardStats = {
   availableCars: number;
   activeReservations: number;
@@ -90,25 +141,62 @@ type DashboardStats = {
 
 async function getDashboardStats(): Promise<DashboardStats> {
   try {
-    const stats = await prisma.$transaction([
-      prisma.car.count({ where: { isAvailable: true } }),
-      prisma.reservation.count({
+    const stats = await prisma.$transaction(async (prisma) => {
+      // Get all cars with their recent reservations
+      const cars = await prisma.car.findMany({
+        include: {
+          reservations: {
+            where: {
+              OR: [
+                { status: "CONFIRMED" },
+                {
+                  AND: [
+                    { status: "PENDING" },
+                    {
+                      createdAt: {
+                        gte: new Date(Date.now() - 30 * 60 * 1000),
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        },
+      });
+
+      // Count truly available cars
+      const availableCars = cars.filter((car) => {
+        return !car.reservations.some(
+          (res) =>
+            res.status === "CONFIRMED" ||
+            (res.status === "PENDING" &&
+              (new Date().getTime() - new Date(res.createdAt).getTime()) /
+                1000 /
+                60 <
+                30)
+        );
+      }).length;
+
+      const activeReservations = await prisma.reservation.count({
         where: {
           status: "CONFIRMED",
           endDate: { gt: new Date() },
         },
-      }),
-      prisma.car.aggregate({
-        _avg: { pricePerDay: true },
-        where: { isAvailable: true },
-      }),
-    ]);
+      });
 
-    return {
-      availableCars: stats[0],
-      activeReservations: stats[1],
-      averagePrice: stats[2]._avg.pricePerDay || 0,
-    };
+      const avgPrice = await prisma.car.aggregate({
+        _avg: { pricePerDay: true },
+      });
+
+      return {
+        availableCars,
+        activeReservations,
+        averagePrice: avgPrice._avg.pricePerDay || new Prisma.Decimal(0),
+      };
+    });
+
+    return stats;
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
     return {
@@ -154,7 +242,7 @@ export default async function DashboardPage({
                 </Link>
                 {session?.user?.role === "ADMIN" && (
                   <Link
-                    href="/dashboard/admin"
+                    href="/admin/dashboard"
                     className="border-2 border-white text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-white/10 transition"
                   >
                     Admin Dashboard
@@ -225,8 +313,10 @@ export default async function DashboardPage({
                     model: car.model,
                     year: car.year,
                     transmission: car.transmission,
-                    pricePerDay: car.pricePerDay.toString(), // Convert Decimal to string here
+                    pricePerDay: car.pricePerDay.toString(),
                     imageUrl: car.imageUrl,
+                    isAvailable: car.isAvailable,
+                    reservations: car.reservations,
                   }}
                 />
               ))}

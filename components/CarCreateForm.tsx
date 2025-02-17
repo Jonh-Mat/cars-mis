@@ -4,6 +4,7 @@ import { TransmissionType, DriveType } from "@prisma/client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function CarCreateForm() {
   const router = useRouter();
@@ -73,6 +74,7 @@ export default function CarCreateForm() {
       if (!response.ok) throw new Error("Failed to create car");
 
       router.push("/dashboard");
+      toast.success("Car created successfully");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

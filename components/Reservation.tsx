@@ -5,6 +5,7 @@ import DatePicker from "react-datepicker";
 import { useRouter } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
 import { differenceInDays } from "date-fns";
+import toast from "react-hot-toast";
 
 type ReservationFormProps = {
   carId: string;
@@ -56,6 +57,7 @@ export default function ReservationForm({
 
       //Redirect to cars page
       router.push("/cars");
+      toast.success("Car reserved!!!");
       router.refresh();
     } catch (error) {
       setError("Something went wrong. Please try again!!!");
