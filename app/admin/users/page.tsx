@@ -2,8 +2,11 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import BackButton from "@/components/BackButton";
+import { BackButton } from "@/components/BackButton";
 import UsersList from "@/components/admin/users/UsersList";
+import AdminStatsCard from "@/components/admin/AdminStatsCard";
+import { PageContainer } from "@/components/ui/PageContainer";
+import { PageHeader } from "@/components/PageHeaders";
 
 async function getUsers() {
   return await prisma.user.findMany({
@@ -34,30 +37,51 @@ export default async function UsersManagementPage() {
   }
 
   const users = await getUsers();
+  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const userName = session.user.name || session.user.email || "Unknown User";
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow">
-        <div className="container mx-auto px-4 py-6">
-          <div className="space-y-4">
-            <BackButton />
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Users Management
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Current User's Login: {session.user.name}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <PageContainer className="p-0">
+      <PageHeader
+        title="Users Management"
+        username={userName}
+        currentDate={currentDate}
+      />
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="p-6 bg-gray-50 dark:bg-navy-900/50 min-h-[calc(100vh-16rem)]">
+        {/* Stats Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <AdminStatsCard
+            title="Total Users"
+            value={users.length}
+            icon="users"
+            trend={`${users.filter((u) => u.role === "ADMIN").length} admins`}
+          />
+          <AdminStatsCard
+            title="Active Users"
+            value={users.filter((u) => u._count.reservations > 0).length}
+            icon="users"
+            trend="With reservations"
+          />
+          <AdminStatsCard
+            title="New Users"
+            value={
+              users.filter((u) => {
+                const daysSinceJoined = Math.floor(
+                  (new Date().getTime() - new Date(u.createdAt).getTime()) /
+                    (1000 * 60 * 60 * 24)
+                );
+                return daysSinceJoined <= 30;
+              }).length
+            }
+            icon="users"
+            trend="Last 30 days"
+          />
+        </div>
+
+        {/* Users List */}
         <UsersList users={users} />
       </div>
-    </div>
+    </PageContainer>
   );
 }

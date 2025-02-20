@@ -4,6 +4,8 @@ import { Reservation, ReservationStatus } from "@prisma/client";
 import { useState } from "react";
 import { toast } from "react-hot-toast";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 type ReservationWithDetails = Reservation & {
   user: {
@@ -126,35 +128,39 @@ export default function ReservationsList({
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm">
+    <div className="space-y-6">
       {/* Filters */}
-      <div className="p-6 border-b">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white dark:bg-navy-800 rounded-lg shadow-sm border border-gray-200 dark:border-navy-700 p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <input
+            <Input
               type="text"
               placeholder="Search by user email or car..."
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div>
-            <select
-              className="w-full md:w-auto px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-              value={filterStatus}
-              onChange={(e) =>
-                setFilterStatus(e.target.value as ReservationStatus | "ALL")
-              }
-            >
-              <option value="ALL">All Statuses</option>
-              {Object.values(ReservationStatus).map((status) => (
-                <option key={status} value={status}>
-                  {status.charAt(0) + status.slice(1).toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            className={cn(
+              "flex h-9 rounded-md border border-gray-200 bg-white px-3 py-2 text-sm",
+              "transition-colors",
+              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500",
+              "disabled:cursor-not-allowed disabled:opacity-50",
+              "dark:border-navy-700 dark:bg-navy-800",
+              "dark:focus-visible:ring-blue-400"
+            )}
+            value={filterStatus}
+            onChange={(e) =>
+              setFilterStatus(e.target.value as ReservationStatus | "ALL")
+            }
+          >
+            <option value="ALL">All Statuses</option>
+            {Object.values(ReservationStatus).map((status) => (
+              <option key={status} value={status}>
+                {status.charAt(0) + status.slice(1).toLowerCase()}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

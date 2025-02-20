@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 type AdminStatsCardProps = {
   title: string;
   value: string | number;
@@ -78,24 +80,44 @@ export default function AdminStatsCard({
 
   return (
     <div
-      className={`bg-white rounded-xl shadow-sm p-6 ${
-        highlight ? "ring-2 ring-blue-500" : ""
-      }`}
+      className={cn(
+        "rounded-xl",
+        "p-6 transition-all duration-300",
+        "bg-white/60 dark:bg-navy-800/60",
+        "backdrop-blur-sm",
+        "border border-gray-200 dark:border-navy-700",
+        "hover:bg-white dark:hover:bg-navy-800",
+        "shadow-sm hover:shadow-md",
+        "dark:shadow-navy-900/50 dark:hover:shadow-navy-900/70",
+        highlight && "ring-2 ring-blue-500 dark:ring-blue-400"
+      )}
     >
       <div className="flex items-center justify-between mb-4">
         <div
-          className={`p-2 rounded-lg ${
-            highlight
-              ? "bg-blue-100 text-blue-600"
-              : "bg-gray-100 text-gray-600"
-          }`}
+          className={cn(
+            "p-2 rounded-lg",
+            "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
+          )}
         >
           {icons[icon]}
         </div>
-        <span className="text-sm text-gray-500">{trend}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {trend}
+        </span>
       </div>
-      <h3 className="text-gray-600 text-sm font-medium mb-2">{title}</h3>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
+      <h3 className="text-gray-600 dark:text-gray-400 text-sm font-medium mb-2">
+        {title}
+      </h3>
+      <p
+        className={cn(
+          "text-2xl font-bold",
+          "bg-clip-text text-transparent",
+          "bg-gradient-to-r from-blue-600 to-blue-800",
+          "dark:from-blue-400 dark:to-blue-600"
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }

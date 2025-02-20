@@ -3,7 +3,10 @@
 import { User, Reservation } from "@prisma/client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast"; // Make sure to install react-hot-toast
+import { toast } from "react-hot-toast";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 type UserWithDetails = User & {
   _count: {
@@ -70,105 +73,132 @@ export default function UsersList({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm">
-      {/* Search */}
-      <div className="p-6 border-b">
-        <div className="flex items-center gap-4">
+    <div className="space-y-6">
+      {/* Search Header */}
+      <div className="bg-white dark:bg-navy-800 rounded-lg shadow-sm border border-gray-200 dark:border-navy-700 p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
-            <input
+            <Input
               type="text"
-              placeholder="Search users..."
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+              placeholder="Search users by name or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full"
             />
           </div>
+          <Button
+            variant="outline"
+            onClick={() => setSearchTerm("")}
+            disabled={!searchTerm}
+          >
+            Clear
+          </Button>
         </div>
       </div>
 
       {/* Users Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                User
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Role
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Reservations
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Joined
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">
-                        {user.name || "Anonymous"}
-                      </div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <select
-                    value={user.role}
-                    onChange={(e) =>
-                      handleRoleChange(
-                        user.id,
-                        e.target.value as "USER" | "ADMIN"
-                      )
-                    }
-                    disabled={isLoading === user.id}
-                    className={`text-sm px-3 py-1 rounded border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none ${
-                      isLoading === user.id
-                        ? "opacity-50 cursor-not-allowed"
-                        : "cursor-pointer"
-                    }`}
-                  >
-                    <option value="USER">User</option>
-                    <option value="ADMIN">Admin</option>
-                  </select>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {user._count.reservations} reservations
-                  </div>
-                  {user.reservations[0] && (
-                    <div className="text-xs text-gray-500">
-                      Last:{" "}
-                      {new Date(
-                        user.reservations[0].createdAt
-                      ).toLocaleDateString()}
-                    </div>
-                  )}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(user.createdAt).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button
-                    onClick={() => router.push(`/admin/users/${user.id}`)}
-                    className="text-blue-600 hover:text-blue-900 transition-colors"
-                  >
-                    View Details
-                  </button>
-                </td>
+      <div className="bg-white dark:bg-navy-800 rounded-lg shadow-sm border border-gray-200 dark:border-navy-700 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-gray-50 dark:bg-navy-900/50">
+                {["User", "Role", "Reservations", "Joined", "Actions"].map(
+                  (header) => (
+                    <th
+                      key={header}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                    >
+                      {header}
+                    </th>
+                  )
+                )}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-200 dark:divide-navy-700">
+              {filteredUsers.map((user) => (
+                <tr
+                  key={user.id}
+                  className="hover:bg-gray-50 dark:hover:bg-navy-900/50 transition-colors"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div className="h-10 w-10 flex-shrink-0">
+                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                          <span className="text-blue-600 dark:text-blue-400 font-medium">
+                            {(user.name || user.email)[0].toUpperCase()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="ml-4">
+                        <div className="text-sm font-medium text-gray-900 dark:text-white">
+                          {user.name || "Anonymous"}
+                        </div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {user.email}
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <select
+                      value={user.role}
+                      onChange={(e) =>
+                        handleRoleChange(
+                          user.id,
+                          e.target.value as "USER" | "ADMIN"
+                        )
+                      }
+                      disabled={isLoading === user.id}
+                      className={cn(
+                        "text-sm rounded-md border-gray-300 dark:border-navy-700",
+                        "bg-white dark:bg-navy-800",
+                        "text-gray-900 dark:text-white",
+                        "focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400",
+                        "disabled:opacity-50 disabled:cursor-not-allowed",
+                        "transition-colors"
+                      )}
+                    >
+                      <option value="USER">User</option>
+                      <option value="ADMIN">Admin</option>
+                    </select>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900 dark:text-white">
+                      {user._count.reservations} reservations
+                    </div>
+                    {user.reservations[0] && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Last:{" "}
+                        {new Date(
+                          user.reservations[0].createdAt
+                        ).toLocaleDateString()}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <Button
+                      variant="ghost"
+                      onClick={() => router.push(`/admin/users/${user.id}`)}
+                    >
+                      View Details
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {filteredUsers.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-500 dark:text-gray-400">
+              No users found matching your search.
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

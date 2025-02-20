@@ -4,7 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import ReservationForm from "@/components/Reservation";
-import BackButton from "@/components/BackButton";
+import { BackButton } from "@/components/BackButton";
+import { cn } from "@/lib/utils";
+import { PageContainer } from "@/components/ui/PageContainer";
 
 async function getCarById(carId: string) {
   try {
@@ -51,57 +53,79 @@ export default async function CarDetailsPage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-sm">
-          <div className="mb-6">
-            <BackButton />
-          </div>
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">
-              Reserve {car.make} {car.model}
-            </h1>
-
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Car Image and Details */}
-              <div>
-                <div className="relative h-64 rounded-lg overflow-hidden mb-4">
-                  <Image
-                    src={car.imageUrl || "/placeholder-car.png"}
-                    alt={`${car.make} ${car.model}`}
-                    fill
-                    style={{ objectFit: "cover" }}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-gray-600">
-                    <span className="font-medium">Year:</span> {car.year}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Transmission:</span>{" "}
-                    {car.transmission}
-                  </p>
-                  <p className="text-gray-600">
-                    <span className="font-medium">Drive Type:</span>{" "}
-                    {car.driveType}
-                  </p>
-                  <p className="text-blue-600 font-bold">
-                    ${Number(car.pricePerDay).toFixed(2).toString()} per day
-                  </p>
-                </div>
-              </div>
-
-              {/* Reservation Form */}
-              <ReservationForm
-                carId={car.id}
-                priceParDay={parseFloat(car.pricePerDay)}
-                userId={session.user.id}
-                existingReservations={car.reservations}
-              />
-            </div>
-          </div>
+    <PageContainer className="max-w-4xl mx-auto">
+      {/* Page Header */}
+      <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-200 dark:border-navy-700">
+        <BackButton />
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Reserve {car.make} {car.model}
+          </h1>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Complete your reservation details below
+          </p>
         </div>
       </div>
-    </div>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        {/* Car Image and Details */}
+        <div className="space-y-6">
+          <div className="relative h-64 rounded-xl overflow-hidden bg-gray-100 dark:bg-navy-900/50">
+            <Image
+              src={car.imageUrl || "/placeholder-car.png"}
+              alt={`${car.make} ${car.model}`}
+              fill
+              style={{ objectFit: "cover" }}
+              className="transition-transform duration-300 hover:scale-105"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              { label: "Year", value: car.year },
+              { label: "Transmission", value: car.transmission },
+              { label: "Drive Type", value: car.driveType },
+              {
+                label: "Price per day",
+                value: `$${Number(car.pricePerDay).toFixed(2)}`,
+                highlight: true,
+              },
+            ].map((detail) => (
+              <div
+                key={detail.label}
+                className="bg-gray-50 dark:bg-navy-900/50 p-4 rounded-lg border border-gray-200 dark:border-navy-700"
+              >
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                  {detail.label}
+                </p>
+                <p
+                  className={cn(
+                    "font-semibold",
+                    detail.highlight
+                      ? "text-blue-600 dark:text-blue-400 text-lg"
+                      : "text-gray-900 dark:text-white"
+                  )}
+                >
+                  {detail.value}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Reservation Form */}
+        <div className="bg-gray-50 dark:bg-navy-900/50 rounded-xl p-6 border border-gray-200 dark:border-navy-700">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            Reservation Details
+          </h2>
+          <ReservationForm
+            carId={car.id}
+            priceParDay={parseFloat(car.pricePerDay)}
+            userId={session.user.id}
+            existingReservations={car.reservations}
+          />
+        </div>
+      </div>
+    </PageContainer>
   );
 }

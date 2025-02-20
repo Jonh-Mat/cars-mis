@@ -2,8 +2,11 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import BackButton from "@/components/BackButton";
+import { BackButton } from "@/components/BackButton";
 import ReservationsList from "@/components/admin/reservations/ReservationsList";
+import AdminStatsCard from "@/components/admin/AdminStatsCard";
+import { PageHeader } from "@/components/PageHeaders";
+import { PageContainer } from "@/components/ui/PageContainer";
 
 async function getReservations() {
   return await prisma.reservation.findMany({
@@ -37,36 +40,64 @@ export default async function ReservationsManagementPage() {
   }
 
   const reservations = await getReservations();
-
-  // Get current date and time in UTC
-  const currentDate = new Date().toISOString().replace("T", " ").slice(0, 19);
-
-  // Get current user's name or email
+  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
   const userName = session.user.name || session.user.email || "Unknown User";
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow">
-        <div className="container mx-auto px-4 py-6">
-          <div className="space-y-4">
-            <BackButton />
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Reservations Management
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Current User's Login: {userName}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  // Calculate some statistics
+  const pendingCount = reservations.filter(
+    (r) => r.status === "PENDING"
+  ).length;
+  const confirmedCount = reservations.filter(
+    (r) => r.status === "CONFIRMED"
+  ).length;
+  const completedCount = reservations.filter(
+    (r) => r.status === "COMPLETED"
+  ).length;
+  const totalRevenue = reservations
+    .filter((r) => r.status === "COMPLETED")
+    .reduce((acc, r) => acc + Number(r.totalPrice), 0);
 
-      <div className="container mx-auto px-4 py-8">
+  return (
+    <PageContainer className="p-0">
+      <PageHeader
+        title="Reservations Management"
+        username={userName}
+        currentDate={currentDate}
+      />
+
+      <div className="p-6 bg-gray-50 dark:bg-navy-900/50 min-h-[calc(100vh-16rem)]">
+        {/* Stats Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          <AdminStatsCard
+            title="Pending Reservations"
+            value={pendingCount}
+            icon="calendar"
+            trend="Awaiting confirmation"
+            highlight={pendingCount > 0}
+          />
+          <AdminStatsCard
+            title="Confirmed Reservations"
+            value={confirmedCount}
+            icon="calendar"
+            trend="In progress"
+          />
+          <AdminStatsCard
+            title="Completed Reservations"
+            value={completedCount}
+            icon="calendar"
+            trend="Successfully finished"
+          />
+          <AdminStatsCard
+            title="Total Revenue"
+            value={`$${totalRevenue.toFixed(2)}`}
+            icon="money"
+            trend="From completed reservations"
+          />
+        </div>
+
+        {/* Reservations List */}
         <ReservationsList reservations={reservations} />
       </div>
-    </div>
+    </PageContainer>
   );
 }

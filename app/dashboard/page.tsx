@@ -9,6 +9,8 @@ import CarFilters from "@/components/CarFilters";
 import CarCard from "@/components/CarCard";
 import Loading from "@/components/Loading";
 import { SearchParamsType } from "@/types";
+import { cn } from "@/lib/utils";
+import { redirect } from "next/navigation";
 
 // Helper function to safely parse search params
 function parseSearchParams(searchParams: SearchParamsType) {
@@ -24,7 +26,6 @@ function parseSearchParams(searchParams: SearchParamsType) {
   };
 }
 
-// Improved car fetching with filtering and pagination
 async function getCars(searchParams: SearchParamsType) {
   // Parse search params safely
   const { make, model, minPrice, maxPrice, transmission, year, page, limit } =
@@ -220,30 +221,40 @@ export default async function DashboardPage({
     ]);
 
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-background">
         {/* Hero Section */}
-        <div className="relative h-[500px] bg-gradient-to-r from-blue-600 to-blue-800 overflow-hidden">
+        <div className="relative h-[500px] overflow-hidden bg-gradient-primary">
           <div className="absolute inset-0 bg-black/20" />
           <div className="relative container mx-auto px-4 h-full flex items-center">
             <div className="w-full lg:w-1/2 text-white z-10">
-              <h1 className="text-5xl font-bold mb-6">
+              <h1 className="text-5xl font-bold mb-6 animate-fade-in">
                 Rent a car — quickly and easily!
               </h1>
-              <p className="text-xl mb-8 text-gray-100">
+              <p className="text-xl mb-8 text-gray-100 animate-slide-up">
                 Streamline your car rental experience with our effortless
                 booking process.
               </p>
               <div className="flex gap-4">
                 <Link
                   href="/cars"
-                  className="bg-white text-blue-600 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-100 transition"
+                  className={cn(
+                    "btn-primary",
+                    "bg-white dark:bg-navy-800 text-blue-600 dark:text-blue-400",
+                    "px-8 py-3 rounded-full text-lg font-semibold",
+                    "hover:bg-gray-100 dark:hover:bg-navy-700 transition"
+                  )}
                 >
                   Explore Cars
                 </Link>
                 {session?.user?.role === "ADMIN" && (
                   <Link
                     href="/admin/dashboard"
-                    className="border-2 border-white text-white px-8 py-3 rounded-full text-lg font-semibold hover:bg-white/10 transition"
+                    className={cn(
+                      "border-2 border-white text-white",
+                      "px-8 py-3 rounded-full text-lg font-semibold",
+                      "hover:bg-white/10 transition",
+                      "dark:border-navy-400 dark:text-navy-100"
+                    )}
                   >
                     Admin Dashboard
                   </Link>
@@ -259,6 +270,7 @@ export default async function DashboardPage({
                   style={{ objectFit: "contain" }}
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
+                  className="animate-bounce-soft"
                 />
               </div>
             </div>
@@ -268,36 +280,50 @@ export default async function DashboardPage({
         {/* Stats Section */}
         <div className="container mx-auto px-4 -mt-16 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-gray-500 text-sm font-medium">
-                Available Cars
-              </h3>
-              <p className="text-3xl font-bold mt-2">{stats.availableCars}</p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-gray-500 text-sm font-medium">
-                Active Reservations
-              </h3>
-              <p className="text-3xl font-bold mt-2">
-                {stats.activeReservations}
-              </p>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-gray-500 text-sm font-medium">
-                Average Price/Day
-              </h3>
-              <p className="text-3xl font-bold mt-2">
-                ${Number(stats.averagePrice).toFixed(2)}
-              </p>
-            </div>
+            {[
+              {
+                title: "Available Cars",
+                value: stats.availableCars,
+              },
+              {
+                title: "Active Reservations",
+                value: stats.activeReservations,
+              },
+              {
+                title: "Average Price/Day",
+                value: `$${Number(stats.averagePrice).toFixed(2)}`,
+              },
+            ].map((stat, index) => (
+              <div
+                key={stat.title}
+                className={cn(
+                  "card",
+                  "p-6 transform transition-all duration-300",
+                  "hover:-translate-y-1 hover:shadow-lg"
+                )}
+              >
+                <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                  {stat.title}
+                </h3>
+                <p className="text-3xl font-bold mt-2 gradient-text">
+                  {stat.value}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* Car Listings */}
         <div className="container mx-auto px-4 py-16">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-            <h2 className="text-3xl font-bold">Available Cars</h2>
-            <Suspense fallback={<div>Loading filters...</div>}>
+            <h2 className="text-3xl font-bold text-foreground">
+              Available Cars
+            </h2>
+            <Suspense
+              fallback={
+                <div className="animate-pulse bg-gray-200 dark:bg-navy-700 h-10 w-48 rounded-lg" />
+              }
+            >
               <CarFilters />
             </Suspense>
           </div>
@@ -308,15 +334,8 @@ export default async function DashboardPage({
                 <CarCard
                   key={car.id}
                   car={{
-                    id: car.id,
-                    make: car.make,
-                    model: car.model,
-                    year: car.year,
-                    transmission: car.transmission,
+                    ...car,
                     pricePerDay: car.pricePerDay.toString(),
-                    imageUrl: car.imageUrl,
-                    isAvailable: car.isAvailable,
-                    reservations: car.reservations,
                   }}
                 />
               ))}
@@ -334,12 +353,14 @@ export default async function DashboardPage({
                           pathname: "/dashboard",
                           query: { ...searchParams, page: pageNum },
                         }}
-                        className={`px-4 py-2 rounded-lg ${
+                        className={cn(
+                          "px-4 py-2 rounded-lg transition-colors",
                           pageNum ===
-                          parseInt(searchParams.page?.toString() || "1")
-                            ? "bg-blue-600 text-white"
-                            : "bg-white text-gray-700 hover:bg-gray-50"
-                        }`}
+                            parseInt(searchParams.page?.toString() || "1")
+                            ? "bg-blue-600 dark:bg-blue-700 text-white"
+                            : "bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300",
+                          "hover:bg-gray-50 dark:hover:bg-navy-700"
+                        )}
                       >
                         {pageNum}
                       </Link>
@@ -354,6 +375,23 @@ export default async function DashboardPage({
     );
   } catch (error) {
     console.error("Error in DashboardPage:", error);
-    return <div>Something went wrong. Please try again later.</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <h2 className="text-2xl font-bold text-foreground">
+            Something went wrong
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Please try again later
+          </p>
+          <Link
+            href="/"
+            className="inline-block btn-primary px-6 py-2 rounded-lg"
+          >
+            Go Home
+          </Link>
+        </div>
+      </div>
+    );
   }
 }

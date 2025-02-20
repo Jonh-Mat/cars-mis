@@ -5,6 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { Button } from "./ui/button";
+import { FormInput } from "./ui/form-input";
+import { FormSelect } from "./ui/form-select";
+import { cn } from "@/lib/utils";
 
 export default function CarCreateForm() {
   const router = useRouter();
@@ -87,12 +91,36 @@ export default function CarCreateForm() {
     <div className="space-y-8">
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Image Upload */}
-        <div className="space-y-2">
-          <label className="block text-lg font-semibold text-gray-900">
-            Car Image
-          </label>
-          <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-xl hover:border-blue-500 transition-colors">
-            <div className="space-y-1 text-center">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <svg
+              className="w-6 h-6 text-gray-600 dark:text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <label className="block text-lg font-semibold text-gray-900 dark:text-white">
+              Car Image
+            </label>
+          </div>
+          <div
+            className={cn(
+              "mt-1 flex justify-center px-6 pt-5 pb-6",
+              "border-2 border-dashed rounded-xl",
+              "border-gray-200 dark:border-navy-700",
+              "hover:border-blue-500 dark:hover:border-blue-400",
+              "transition-colors",
+              "bg-gray-50 dark:bg-navy-900/50"
+            )}
+          >
+            <div className="space-y-3 text-center">
               {imagePreview ? (
                 <div className="relative h-48 w-full mb-4">
                   <Image
@@ -100,25 +128,62 @@ export default function CarCreateForm() {
                     alt="Preview"
                     fill
                     style={{ objectFit: "contain" }}
+                    className="rounded-lg"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setImagePreview(null);
+                      setImageFile(null);
+                    }}
+                    className="absolute top-2 right-2 p-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
                 </div>
               ) : (
-                <svg
-                  className="mx-auto h-12 w-12 text-gray-400"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 48 48"
-                >
-                  <path
-                    d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <div className="flex flex-col items-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    Drag and drop your image here, or
+                  </p>
+                </div>
               )}
-              <div className="flex text-sm text-gray-600 justify-center">
-                <label className="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500">
+              <div className="flex justify-center text-sm">
+                <label
+                  className={cn(
+                    "relative cursor-pointer rounded-md font-medium",
+                    "text-blue-600 dark:text-blue-400",
+                    "hover:text-blue-500 dark:hover:text-blue-300",
+                    "focus-within:outline-none focus-within:ring-2",
+                    "focus-within:ring-blue-500 dark:focus-within:ring-blue-400",
+                    "focus-within:ring-offset-2"
+                  )}
+                >
                   <span>Upload a file</span>
                   <input
                     type="file"
@@ -129,181 +194,107 @@ export default function CarCreateForm() {
                   />
                 </label>
               </div>
-              <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                PNG, JPG, GIF up to 10MB
+              </p>
             </div>
           </div>
-        </div>
-
+        </div>{" "}
         {/* Basic Information */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Basic Information
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Make
-              </label>
-              <input
-                type="text"
-                name="make"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., Toyota"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Model
-              </label>
-              <input
-                type="text"
-                name="model"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., Camry"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Year
-              </label>
-              <input
-                type="number"
-                name="year"
-                min="1900"
-                max="2025"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., 2023"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Color
-              </label>
-              <input
-                type="text"
-                name="color"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., Silver"
-              />
-            </div>
+            <FormInput
+              label="Make"
+              name="make"
+              required
+              placeholder="e.g., Toyota"
+            />
+            <FormInput
+              label="Model"
+              name="model"
+              required
+              placeholder="e.g., Camry"
+            />
+            <FormInput
+              label="Year"
+              name="year"
+              type="number"
+              min="1900"
+              max="2025"
+              required
+              placeholder="e.g., 2023"
+            />
+            <FormInput
+              label="Color"
+              name="color"
+              required
+              placeholder="e.g., Silver"
+            />
           </div>
         </div>
-
         {/* Technical Details */}
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
             Technical Details
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Transmission
-              </label>
-              <select
-                name="transmission"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-              >
-                <option value="">Select Transmission</option>
-                {Object.values(TransmissionType).map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Drive Type
-              </label>
-              <select
-                name="driveType"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-              >
-                <option value="">Select Drive Type</option>
-                {Object.values(DriveType).map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Fuel Efficiency (MPG)
-              </label>
-              <input
-                type="number"
-                name="fuelEfficiency"
-                step="0.1"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., 25.5"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Price Per Day ($)
-              </label>
-              <input
-                type="number"
-                name="pricePerDay"
-                step="0.01"
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                placeholder="e.g., 50.00"
-              />
-            </div>
+            <FormSelect
+              label="Transmission"
+              name="transmission"
+              required
+              options={Object.values(TransmissionType).map((type) => ({
+                value: type,
+                label: type,
+              }))}
+            />
+            <FormSelect
+              label="Drive Type"
+              name="driveType"
+              required
+              options={Object.values(DriveType).map((type) => ({
+                value: type,
+                label: type,
+              }))}
+            />
+            <FormInput
+              label="Fuel Efficiency (MPG)"
+              name="fuelEfficiency"
+              type="number"
+              step="0.1"
+              required
+              placeholder="e.g., 25.5"
+            />
+            <FormInput
+              label="Price Per Day ($)"
+              name="pricePerDay"
+              type="number"
+              step="0.01"
+              required
+              placeholder="e.g., 50.00"
+            />
           </div>
         </div>
-
         {error && (
-          <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
+          <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
             {error}
           </div>
         )}
-
         <div className="flex justify-end pt-4">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-          >
+          <Button type="submit" disabled={isLoading}>
             {isLoading ? (
               <div className="flex items-center space-x-2">
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
+                  {/* ... Loading SVG remains the same ... */}
                 </svg>
                 <span>Creating...</span>
               </div>
             ) : (
               "Create Car"
             )}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

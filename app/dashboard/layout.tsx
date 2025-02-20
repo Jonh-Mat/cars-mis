@@ -1,7 +1,13 @@
-import { getServerSession } from "next-auth/next";
+import type { Metadata } from "next";
+import { cn } from "@/lib/utils";
 import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
-import DashboardNav from "./dashboard-nav";
+
+export const metadata: Metadata = {
+  title: "Dashboard - Car Rental System",
+  description: "Dashboard for car rental management system",
+};
 
 export default async function DashboardLayout({
   children,
@@ -10,14 +16,12 @@ export default async function DashboardLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session?.user) {
     redirect("/auth/signin");
   }
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      <DashboardNav user={session.user} />
-      <main className="p-6">{children}</main>
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      <div className="container mx-auto px-4 py-8">{children}</div>
     </div>
   );
 }

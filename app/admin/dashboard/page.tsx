@@ -6,7 +6,9 @@ import { prisma } from "@/lib/prisma";
 import AdminStatsCard from "@/components/admin/AdminStatsCard";
 import AdminQuickActions from "@/components/admin/AdminQuickActions";
 import RecentActivities from "@/components/admin/RecentActivities";
-import BackButton from "@/components/BackButton";
+import { BackButton } from "@/components/BackButton";
+import { PageContainer } from "@/components/ui/PageContainer";
+import { Button } from "@/components/ui/button";
 
 async function getAdminStats() {
   const [
@@ -46,8 +48,8 @@ async function getAdminStats() {
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
-  const currentDate = "2025-02-14 17:18:06";
-  const userName = "Jonh-Mat";
+  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const userName = session?.user?.name || "Admin";
 
   if (!session?.user || session.user.role !== "ADMIN") {
     return notFound();
@@ -56,29 +58,48 @@ export default async function AdminDashboardPage() {
   const stats = await getAdminStats();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <PageContainer className="p-0">
       {/* Admin Header */}
-      <div className="bg-gradient-to-r from-blue-800 to-blue-900 text-white">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex justify-between items-center mb-6">
-            <div>
-              <BackButton />
-              <h1 className="text-3xl font-bold mt-4">Admin Dashboard</h1>
-              <p className="text-blue-100">Logged in as: {session.user.name}</p>
+      <div className="bg-gradient-primary text-white rounded-t-2xl">
+        <div className="px-6 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <BackButton
+                  variant="ghost"
+                  className="text-white hover:bg-white/20"
+                />
+                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+              </div>
+              <p className="text-blue-100">
+                Logged in as: {session.user.name || session.user.email}
+              </p>
             </div>
-            <Link
-              href="/admin/car-create"
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Add New Car
-            </Link>
+            <Button asChild variant="secondary">
+              <Link href="/admin/car-create">
+                <svg
+                  className="w-4 h-4 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+                Add New Car
+              </Link>
+            </Button>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="p-6 space-y-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <AdminStatsCard
             title="Total Users"
             value={stats.totalUsers}
@@ -118,6 +139,6 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

@@ -2,7 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Add any global styles here */
-body {
-  min-height: 100vh;
+@layer base {
+  :root {
+    /* Light theme variables */
+    --background: #ffffff;
+    --foreground: #0f172a;
+    --accent-primary: #2563eb;
+    --accent-secondary: #60a5fa;
+    --gradient-primary-start: #3b82f6;
+    --gradient-primary-end: #1d4ed8;
+  }
+
+  .dark {
+    /* Dark theme variables */
+    --background: #0f172a;
+    --foreground: #ffffff;
+    --accent-primary: #60a5fa;
+    --accent-secondary: #93c5fd;
+    --gradient-primary-start: #1e40af;
+    --gradient-primary-end: #1e3a8a;
+  }
+}
+
+/* Custom utility classes */
+@layer components {
+  .card {
+    @apply bg-white dark:bg-navy-800 rounded-xl shadow-smooth hover:shadow-hover transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply hover:shadow-card transform hover:-translate-y-1 transition-all duration-300;
+  }
+
+  .gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800 dark:from-blue-400 dark:to-blue-600;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition-opacity duration-300;
+  }
+
+  .btn-secondary {
+    @apply bg-white dark:bg-navy-700 text-blue-600 dark:text-blue-400 border border-blue-600 dark:border-blue-400 px-4 py-2 rounded-lg hover:bg-blue-50 dark:hover:bg-navy-600 transition-colors duration-300;
+  }
 }
