@@ -3,16 +3,20 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import { ReservationStatus } from '@prisma/client'
-import { RouteHandler } from '@/types/route'
 
-type ReservationRouteContext = {
+interface Params {
+  promise: Promise<any>
   reservationId: string
+  then: (onfulfilled?: ((value: any) => any) | undefined) => Promise<any>
+  catch: (onrejected?: ((reason: any) => any) | undefined) => Promise<any>
+  finally: (onfinally?: (() => void) | undefined) => Promise<any>
+  [Symbol.toStringTag]: string
 }
 
-export const PATCH: RouteHandler<ReservationRouteContext> = async (
+export async function PATCH(
   request: NextRequest,
-  { params }
-) => {
+  { params }: { params: Params }
+) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || session.user.role !== 'ADMIN') {
