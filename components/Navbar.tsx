@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
 import { signOut } from 'next-auth/react'
 import { useSession } from 'next-auth/react'
 import { Button } from './ui/button'

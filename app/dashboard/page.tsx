@@ -292,7 +292,7 @@ export default async function DashboardPage({
                 title: 'Average Price/Day',
                 value: `$${Number(stats.averagePrice).toFixed(2)}`,
               },
-            ].map((stat, _index) => (
+            ].map((stat) => (
               <div
                 key={stat.title}
                 className={cn(
