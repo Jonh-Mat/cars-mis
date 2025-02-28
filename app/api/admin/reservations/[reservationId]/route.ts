@@ -4,14 +4,14 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import { ReservationStatus } from '@prisma/client'
 
-type RouteParams = {
-  params: {
-    reservationId: string
+export async function PATCH(
+  request: Request,
+  {
+    params,
+  }: { params: { reservationId: string } } & {
+    searchParams: { [key: string]: string | string[] | undefined }
   }
-}
-
-// Update the PATCH function signature
-export async function PATCH(request: Request, context: RouteParams) {
+) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || session.user.role !== 'ADMIN') {
@@ -31,9 +31,8 @@ export async function PATCH(request: Request, context: RouteParams) {
       )
     }
 
-    // Step 1: Update reservation status
     const updatedReservation = await prisma.reservation.update({
-      where: { id: context.params.reservationId }, // Updated to use context
+      where: { id: params.reservationId },
       data: { status },
       include: {
         car: true,
@@ -46,7 +45,6 @@ export async function PATCH(request: Request, context: RouteParams) {
       },
     })
 
-    // Step 2: Update car availability based on the new status
     try {
       if (status === ReservationStatus.CONFIRMED) {
         await prisma.car.update({
