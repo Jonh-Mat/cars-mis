@@ -1,17 +1,15 @@
-"use client";
+'use client'
 
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { ButtonProps } from "@/components/ui/button";
-
-interface BackButtonProps extends ButtonProps {}
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
+import { ButtonProps } from '@/components/ui/button'
 
 export function BackButton({
   className,
-  variant = "outline",
+  variant = 'outline',
   ...props
-}: BackButtonProps) {
-  const router = useRouter();
+}: ButtonProps) {
+  const router = useRouter()
 
   return (
     <Button
@@ -35,5 +33,5 @@ export function BackButton({
       </svg>
       Back
     </Button>
-  );
+  )
 }

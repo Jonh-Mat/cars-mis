@@ -1,34 +1,34 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
-import Image from "next/image";
-import Link from "next/link";
-import { Prisma, TransmissionType } from "@prisma/client";
-import { Suspense } from "react";
-import CarFilters from "@/components/CarFilters";
-import CarCard from "@/components/CarCard";
-import Loading from "@/components/Loading";
-import { SearchParamsType } from "@/types";
-import { cn } from "@/lib/utils";
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '../api/auth/[...nextauth]/route'
+import { prisma } from '@/lib/prisma'
+import Image from 'next/image'
+import Link from 'next/link'
+import { Prisma, TransmissionType } from '@prisma/client'
+import { Suspense } from 'react'
+import CarFilters from '@/components/CarFilters'
+import CarCard from '@/components/CarCard'
+import Loading from '@/components/Loading'
+import { SearchParamsType } from '@/types'
+import { cn } from '@/lib/utils'
 
 // Helper function to safely parse search params
 function parseSearchParams(searchParams: SearchParamsType) {
   return {
-    make: searchParams?.make || "",
-    model: searchParams?.model || "",
-    minPrice: searchParams?.minPrice || "",
-    maxPrice: searchParams?.maxPrice || "",
+    make: searchParams?.make || '',
+    model: searchParams?.model || '',
+    minPrice: searchParams?.minPrice || '',
+    maxPrice: searchParams?.maxPrice || '',
     transmission: searchParams?.transmission as TransmissionType | undefined,
-    year: searchParams?.year || "",
+    year: searchParams?.year || '',
     page: Number(searchParams?.page) || 1,
     limit: Number(searchParams?.limit) || 12,
-  };
+  }
 }
 
 async function getCars(searchParams: SearchParamsType) {
   // Parse search params safely
   const { make, model, minPrice, maxPrice, transmission, year, page, limit } =
-    parseSearchParams(searchParams);
+    parseSearchParams(searchParams)
 
   const where: Prisma.CarWhereInput = {
     ...(make && {
@@ -51,9 +51,9 @@ async function getCars(searchParams: SearchParamsType) {
     ...(maxPrice && {
       pricePerDay: { lte: new Prisma.Decimal(maxPrice) },
     }),
-  };
+  }
 
-  const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit
 
   try {
     // Get cars with their recent reservations
@@ -62,15 +62,15 @@ async function getCars(searchParams: SearchParamsType) {
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: 'desc' },
         include: {
           reservations: {
             where: {
               OR: [
-                { status: "CONFIRMED" },
+                { status: 'CONFIRMED' },
                 {
                   AND: [
-                    { status: "PENDING" },
+                    { status: 'PENDING' },
                     {
                       createdAt: {
                         gte: new Date(Date.now() - 30 * 60 * 1000), // Last 30 minutes
@@ -87,33 +87,33 @@ async function getCars(searchParams: SearchParamsType) {
               endDate: true,
             },
             orderBy: {
-              createdAt: "desc",
+              createdAt: 'desc',
             },
           },
         },
       }),
       prisma.car.count({ where }),
-    ]);
+    ])
 
     // Filter out cars that are currently reserved or in pending state
     const availableCars = carsWithReservations.filter((car) => {
       const hasConfirmedReservation = car.reservations.some(
-        (res) => res.status === "CONFIRMED"
-      );
+        (res) => res.status === 'CONFIRMED'
+      )
 
       const hasPendingReservation = car.reservations.some((res) => {
-        if (res.status === "PENDING") {
+        if (res.status === 'PENDING') {
           const minutesAgo =
             (new Date().getTime() - new Date(res.createdAt).getTime()) /
             1000 /
-            60;
-          return minutesAgo < 30;
+            60
+          return minutesAgo < 30
         }
-        return false;
-      });
+        return false
+      })
 
-      return !hasConfirmedReservation && !hasPendingReservation;
-    });
+      return !hasConfirmedReservation && !hasPendingReservation
+    })
 
     return {
       cars: availableCars.map((car) => ({
@@ -123,21 +123,21 @@ async function getCars(searchParams: SearchParamsType) {
       })),
       total: availableCars.length, // Update total count to reflect actually available cars
       pages: Math.ceil(availableCars.length / limit),
-    };
+    }
   } catch (error) {
-    console.error("Error fetching cars:", error);
+    console.error('Error fetching cars:', error)
     return {
       cars: [],
       total: 0,
       pages: 0,
-    };
+    }
   }
 }
 type DashboardStats = {
-  availableCars: number;
-  activeReservations: number;
-  averagePrice: number | Prisma.Decimal;
-};
+  availableCars: number
+  activeReservations: number
+  averagePrice: number | Prisma.Decimal
+}
 
 async function getDashboardStats(): Promise<DashboardStats> {
   try {
@@ -148,10 +148,10 @@ async function getDashboardStats(): Promise<DashboardStats> {
           reservations: {
             where: {
               OR: [
-                { status: "CONFIRMED" },
+                { status: 'CONFIRMED' },
                 {
                   AND: [
-                    { status: "PENDING" },
+                    { status: 'PENDING' },
                     {
                       createdAt: {
                         gte: new Date(Date.now() - 30 * 60 * 1000),
@@ -163,61 +163,61 @@ async function getDashboardStats(): Promise<DashboardStats> {
             },
           },
         },
-      });
+      })
 
       // Count truly available cars
       const availableCars = cars.filter((car) => {
         return !car.reservations.some(
           (res) =>
-            res.status === "CONFIRMED" ||
-            (res.status === "PENDING" &&
+            res.status === 'CONFIRMED' ||
+            (res.status === 'PENDING' &&
               (new Date().getTime() - new Date(res.createdAt).getTime()) /
                 1000 /
                 60 <
                 30)
-        );
-      }).length;
+        )
+      }).length
 
       const activeReservations = await prisma.reservation.count({
         where: {
-          status: "CONFIRMED",
+          status: 'CONFIRMED',
           endDate: { gt: new Date() },
         },
-      });
+      })
 
       const avgPrice = await prisma.car.aggregate({
         _avg: { pricePerDay: true },
-      });
+      })
 
       return {
         availableCars,
         activeReservations,
         averagePrice: avgPrice._avg.pricePerDay || new Prisma.Decimal(0),
-      };
-    });
+      }
+    })
 
-    return stats;
+    return stats
   } catch (error) {
-    console.error("Error fetching dashboard stats:", error);
+    console.error('Error fetching dashboard stats:', error)
     return {
       availableCars: 0,
       activeReservations: 0,
       averagePrice: 0,
-    };
+    }
   }
 }
 
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: SearchParamsType;
+  searchParams: SearchParamsType
 }) {
   try {
-    const [session, { cars, total, pages }, stats] = await Promise.all([
+    const [session, { cars, pages }, stats] = await Promise.all([
       getServerSession(authOptions),
       getCars(searchParams),
       getDashboardStats(),
-    ]);
+    ])
 
     return (
       <div className="min-h-screen bg-background">
@@ -237,22 +237,22 @@ export default async function DashboardPage({
                 <Link
                   href="/cars"
                   className={cn(
-                    "btn-primary",
-                    "bg-white dark:bg-navy-800 text-blue-600 dark:text-blue-400",
-                    "px-8 py-3 rounded-full text-lg font-semibold",
-                    "hover:bg-gray-100 dark:hover:bg-navy-700 transition"
+                    'btn-primary',
+                    'bg-white dark:bg-navy-800 text-blue-600 dark:text-blue-400',
+                    'px-8 py-3 rounded-full text-lg font-semibold',
+                    'hover:bg-gray-100 dark:hover:bg-navy-700 transition'
                   )}
                 >
                   Explore Cars
                 </Link>
-                {session?.user?.role === "ADMIN" && (
+                {session?.user?.role === 'ADMIN' && (
                   <Link
                     href="/admin/dashboard"
                     className={cn(
-                      "border-2 border-white text-white",
-                      "px-8 py-3 rounded-full text-lg font-semibold",
-                      "hover:bg-white/10 transition",
-                      "dark:border-navy-400 dark:text-navy-100"
+                      'border-2 border-white text-white',
+                      'px-8 py-3 rounded-full text-lg font-semibold',
+                      'hover:bg-white/10 transition',
+                      'dark:border-navy-400 dark:text-navy-100'
                     )}
                   >
                     Admin Dashboard
@@ -266,7 +266,7 @@ export default async function DashboardPage({
                   src="/cars/heroo.png"
                   alt="Featured Car"
                   fill
-                  style={{ objectFit: "contain" }}
+                  style={{ objectFit: 'contain' }}
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="animate-bounce-soft"
@@ -281,24 +281,24 @@ export default async function DashboardPage({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                title: "Available Cars",
+                title: 'Available Cars',
                 value: stats.availableCars,
               },
               {
-                title: "Active Reservations",
+                title: 'Active Reservations',
                 value: stats.activeReservations,
               },
               {
-                title: "Average Price/Day",
+                title: 'Average Price/Day',
                 value: `$${Number(stats.averagePrice).toFixed(2)}`,
               },
-            ].map((stat, index) => (
+            ].map((stat, _index) => (
               <div
                 key={stat.title}
                 className={cn(
-                  "card",
-                  "p-6 transform transition-all duration-300",
-                  "hover:-translate-y-1 hover:shadow-lg"
+                  'card',
+                  'p-6 transform transition-all duration-300',
+                  'hover:-translate-y-1 hover:shadow-lg'
                 )}
               >
                 <h3 className="text-gray-500 dark:text-gray-400 text-sm font-medium">
@@ -349,16 +349,16 @@ export default async function DashboardPage({
                       <Link
                         key={pageNum}
                         href={{
-                          pathname: "/dashboard",
+                          pathname: '/dashboard',
                           query: { ...searchParams, page: pageNum },
                         }}
                         className={cn(
-                          "px-4 py-2 rounded-lg transition-colors",
+                          'px-4 py-2 rounded-lg transition-colors',
                           pageNum ===
-                            parseInt(searchParams.page?.toString() || "1")
-                            ? "bg-blue-600 dark:bg-blue-700 text-white"
-                            : "bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300",
-                          "hover:bg-gray-50 dark:hover:bg-navy-700"
+                            parseInt(searchParams.page?.toString() || '1')
+                            ? 'bg-blue-600 dark:bg-blue-700 text-white'
+                            : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300',
+                          'hover:bg-gray-50 dark:hover:bg-navy-700'
                         )}
                       >
                         {pageNum}
@@ -371,9 +371,9 @@ export default async function DashboardPage({
           </Suspense>
         </div>
       </div>
-    );
+    )
   } catch (error) {
-    console.error("Error in DashboardPage:", error);
+    console.error('Error in DashboardPage:', error)
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4">
@@ -391,6 +391,6 @@ export default async function DashboardPage({
           </Link>
         </div>
       </div>
-    );
+    )
   }
 }

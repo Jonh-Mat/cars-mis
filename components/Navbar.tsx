@@ -1,15 +1,16 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useTheme } from "next-themes";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
-import { Button } from "./ui/button";
-import { ThemeToggle } from "./ThemeToggle";
-import { signIn } from "next-auth/react";
+import Link from 'next/link'
+import { useTheme } from 'next-themes'
+import { signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
+import { Button } from './ui/button'
+import { ThemeToggle } from './ThemeToggle'
+import { signIn } from 'next-auth/react'
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { data: session } = useSession()
+  // const { theme } = useTheme();
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-navy-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -34,7 +35,7 @@ export default function Navbar() {
             >
               Cars
             </Link>
-            {session?.user?.role === "ADMIN" && (
+            {session?.user?.role === 'ADMIN' && (
               <Link
                 href="/admin/dashboard"
                 className="text-gray-600 hover:text-blue-600 dark:text-gray-300 dark:hover:text-blue-400"
@@ -58,5 +59,5 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
-  );
+  )
 }
