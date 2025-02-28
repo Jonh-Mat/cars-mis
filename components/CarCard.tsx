@@ -32,7 +32,6 @@ export default function CarCard({
   currentDate,
 }: CarCardProps) {
   const router = useRouter();
-  const { theme } = useTheme();
 
   // Function to check if car is available
   const isCarAvailable = () => {

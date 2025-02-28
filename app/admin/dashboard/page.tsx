@@ -48,8 +48,6 @@ async function getAdminStats() {
 
 export default async function AdminDashboardPage() {
   const session = await getServerSession(authOptions);
-  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
-  const userName = session?.user?.name || "Admin";
 
   if (!session?.user || session.user.role !== "ADMIN") {
     return notFound();

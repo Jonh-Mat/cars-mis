@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { BackButton } from "@/components/BackButton";
 import UsersList from "@/components/admin/users/UsersList";
 import AdminStatsCard from "@/components/admin/AdminStatsCard";
 import { PageContainer } from "@/components/ui/PageContainer";

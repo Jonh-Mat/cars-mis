@@ -3,14 +3,13 @@ import { authOptions } from "../api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 import Image from "next/image";
 import Link from "next/link";
-import { Car, Prisma, TransmissionType } from "@prisma/client";
+import { Prisma, TransmissionType } from "@prisma/client";
 import { Suspense } from "react";
 import CarFilters from "@/components/CarFilters";
 import CarCard from "@/components/CarCard";
 import Loading from "@/components/Loading";
 import { SearchParamsType } from "@/types";
 import { cn } from "@/lib/utils";
-import { redirect } from "next/navigation";
 
 // Helper function to safely parse search params
 function parseSearchParams(searchParams: SearchParamsType) {
@@ -58,7 +57,7 @@ async function getCars(searchParams: SearchParamsType) {
 
   try {
     // Get cars with their recent reservations
-    const [carsWithReservations, total] = await Promise.all([
+    const [carsWithReservations] = await Promise.all([
       prisma.car.findMany({
         where,
         skip,

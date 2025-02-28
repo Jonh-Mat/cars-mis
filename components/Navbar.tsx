@@ -10,7 +10,6 @@ import { signIn } from "next-auth/react";
 
 export default function Navbar() {
   const { data: session } = useSession();
-  const { theme } = useTheme();
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-gray-200 dark:border-navy-700 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
