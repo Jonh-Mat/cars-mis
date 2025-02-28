@@ -1,17 +1,18 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import { ReservationStatus } from '@prisma/client'
+import { RouteHandler } from '@/types/route'
 
-export async function PATCH(
-  request: Request,
-  {
-    params,
-  }: { params: { reservationId: string } } & {
-    searchParams: { [key: string]: string | string[] | undefined }
-  }
-) {
+type ReservationRouteContext = {
+  reservationId: string
+}
+
+export const PATCH: RouteHandler<ReservationRouteContext> = async (
+  request: NextRequest,
+  { params }
+) => {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || session.user.role !== 'ADMIN') {
@@ -65,14 +66,11 @@ export async function PATCH(
       console.error('Failed to update car availability:', carUpdateError)
     }
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: updatedReservation,
-        message: `Reservation status updated to ${status}`,
-      },
-      { status: 200 }
-    )
+    return NextResponse.json({
+      success: true,
+      data: updatedReservation,
+      message: `Reservation status updated to ${status}`,
+    })
   } catch (error) {
     console.error('Error in PATCH reservation:', error)
     return NextResponse.json(
