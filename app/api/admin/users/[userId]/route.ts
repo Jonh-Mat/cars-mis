@@ -5,11 +5,16 @@ import { prisma } from '@/lib/prisma'
 import { Role } from '@prisma/client'
 
 interface Params {
-  promise: Promise<any>
+  promise: Promise<unknown>
   userId: string
-  then: (onfulfilled?: ((value: any) => any) | undefined) => Promise<any>
-  catch: (onrejected?: ((reason: any) => any) | undefined) => Promise<any>
-  finally: (onfinally?: (() => void) | undefined) => Promise<any>
+  then: <TResult1 = unknown, TResult2 = never>(
+    onfulfilled?: ((value: unknown) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+  ) => Promise<TResult1 | TResult2>
+  catch: <TResult = never>(
+    onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | null
+  ) => Promise<unknown>
+  finally: (onfinally?: (() => void) | null) => Promise<unknown>
   [Symbol.toStringTag]: string
 }
 

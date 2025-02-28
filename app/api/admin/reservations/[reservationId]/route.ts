@@ -1,22 +1,24 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { prisma } from '@/lib/prisma'
 import { ReservationStatus } from '@prisma/client'
 
 interface Params {
-  promise: Promise<any>
+  promise: Promise<unknown>
   reservationId: string
-  then: (onfulfilled?: ((value: any) => any) | undefined) => Promise<any>
-  catch: (onrejected?: ((reason: any) => any) | undefined) => Promise<any>
-  finally: (onfinally?: (() => void) | undefined) => Promise<any>
+  then: <TResult1 = unknown, TResult2 = never>(
+    onfulfilled?: ((value: unknown) => TResult1 | PromiseLike<TResult1>) | null,
+    onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null
+  ) => Promise<TResult1 | TResult2>
+  catch: <TResult = never>(
+    onrejected?: ((reason: unknown) => TResult | PromiseLike<TResult>) | null
+  ) => Promise<unknown>
+  finally: (onfinally?: (() => void) | null) => Promise<unknown>
   [Symbol.toStringTag]: string
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: Request, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user || session.user.role !== 'ADMIN') {
@@ -49,26 +51,6 @@ export async function PATCH(
         },
       },
     })
-
-    try {
-      if (status === ReservationStatus.CONFIRMED) {
-        await prisma.car.update({
-          where: { id: updatedReservation.carId },
-          data: { isAvailable: false },
-        })
-      } else if (
-        [ReservationStatus.CANCELLED, ReservationStatus.COMPLETED].includes(
-          status
-        )
-      ) {
-        await prisma.car.update({
-          where: { id: updatedReservation.carId },
-          data: { isAvailable: true },
-        })
-      }
-    } catch (carUpdateError) {
-      console.error('Failed to update car availability:', carUpdateError)
-    }
 
     return NextResponse.json({
       success: true,
