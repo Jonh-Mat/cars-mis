@@ -1,23 +1,23 @@
-import { getServerSession } from "next-auth";
-import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
-import { authOptions } from "../auth/[...nextauth]/route";
+import { getServerSession } from 'next-auth'
+import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import authOptions from '../auth/[...nextauth]/route'
 
 export async function POST(request: Request) {
   try {
     //Check authentication
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession(authOptions)
     if (!session) {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return new NextResponse('Unauthorized', { status: 401 })
     }
 
     //Get request body
-    const body = await request.json();
-    const { carId, userId, startDate, endDate, totalPrice } = body;
+    const body = await request.json()
+    const { carId, userId, startDate, endDate, totalPrice } = body
 
     //Validate required fields
     if (!carId || !userId || !startDate || !endDate || !totalPrice) {
-      return new NextResponse("Missing required fields", { status: 400 });
+      return new NextResponse('Missing required fields', { status: 400 })
     }
 
     //check if car is available for the selected dates
@@ -39,12 +39,12 @@ export async function POST(request: Request) {
           },
         ],
       },
-    });
+    })
 
     if (existingReservation) {
-      return new NextResponse("Car is not available for selected dates", {
+      return new NextResponse('Car is not available for selected dates', {
         status: 400,
-      });
+      })
     }
 
     //Create reservation
@@ -55,13 +55,13 @@ export async function POST(request: Request) {
         startDate: new Date(startDate),
         endDate: new Date(endDate),
         totalPrice,
-        status: "PENDING",
+        status: 'PENDING',
       },
-    });
+    })
 
-    return NextResponse.json(reservation);
+    return NextResponse.json(reservation)
   } catch (error) {
-    console.error("Reservation error:", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error('Reservation error:', error)
+    return new NextResponse('Internal error', { status: 500 })
   }
 }

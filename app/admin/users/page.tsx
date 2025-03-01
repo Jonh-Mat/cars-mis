@@ -1,11 +1,11 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { notFound } from "next/navigation";
-import { prisma } from "@/lib/prisma";
-import UsersList from "@/components/admin/users/UsersList";
-import AdminStatsCard from "@/components/admin/AdminStatsCard";
-import { PageContainer } from "@/components/ui/PageContainer";
-import { PageHeader } from "@/components/PageHeaders";
+import { getServerSession } from 'next-auth/next'
+import authOptions from '@/app/api/auth/[...nextauth]/route'
+import { notFound } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import UsersList from '@/components/admin/users/UsersList'
+import AdminStatsCard from '@/components/admin/AdminStatsCard'
+import { PageContainer } from '@/components/ui/PageContainer'
+import { PageHeader } from '@/components/PageHeaders'
 
 async function getUsers() {
   return await prisma.user.findMany({
@@ -18,26 +18,26 @@ async function getUsers() {
       reservations: {
         take: 1,
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
       },
     },
     orderBy: {
-      createdAt: "desc",
+      createdAt: 'desc',
     },
-  });
+  })
 }
 
 export default async function UsersManagementPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return notFound();
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return notFound()
   }
 
-  const users = await getUsers();
-  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
-  const userName = session.user.name || session.user.email || "Unknown User";
+  const users = await getUsers()
+  const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  const userName = session.user.name || session.user.email || 'Unknown User'
 
   return (
     <PageContainer className="p-0">
@@ -54,7 +54,7 @@ export default async function UsersManagementPage() {
             title="Total Users"
             value={users.length}
             icon="users"
-            trend={`${users.filter((u) => u.role === "ADMIN").length} admins`}
+            trend={`${users.filter((u) => u.role === 'ADMIN').length} admins`}
           />
           <AdminStatsCard
             title="Active Users"
@@ -69,8 +69,8 @@ export default async function UsersManagementPage() {
                 const daysSinceJoined = Math.floor(
                   (new Date().getTime() - new Date(u.createdAt).getTime()) /
                     (1000 * 60 * 60 * 24)
-                );
-                return daysSinceJoined <= 30;
+                )
+                return daysSinceJoined <= 30
               }).length
             }
             icon="users"
@@ -82,5 +82,5 @@ export default async function UsersManagementPage() {
         <UsersList users={users} />
       </div>
     </PageContainer>
-  );
+  )
 }

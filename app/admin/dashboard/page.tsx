@@ -1,14 +1,14 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import AdminStatsCard from "@/components/admin/AdminStatsCard";
-import AdminQuickActions from "@/components/admin/AdminQuickActions";
-import RecentActivities from "@/components/admin/RecentActivities";
-import { BackButton } from "@/components/BackButton";
-import { PageContainer } from "@/components/ui/PageContainer";
-import { Button } from "@/components/ui/button";
+import { getServerSession } from 'next-auth/next'
+import authOptions from '@/app/api/auth/[...nextauth]/route'
+import { notFound } from 'next/navigation'
+import Link from 'next/link'
+import { prisma } from '@/lib/prisma'
+import AdminStatsCard from '@/components/admin/AdminStatsCard'
+import AdminQuickActions from '@/components/admin/AdminQuickActions'
+import RecentActivities from '@/components/admin/RecentActivities'
+import { BackButton } from '@/components/BackButton'
+import { PageContainer } from '@/components/ui/PageContainer'
+import { Button } from '@/components/ui/button'
 
 async function getAdminStats() {
   const [
@@ -21,21 +21,21 @@ async function getAdminStats() {
     prisma.user.count(),
     prisma.car.count(),
     prisma.reservation.count({
-      where: { status: "PENDING" },
+      where: { status: 'PENDING' },
     }),
     prisma.reservation.aggregate({
-      where: { status: "COMPLETED" },
+      where: { status: 'COMPLETED' },
       _sum: { totalPrice: true },
     }),
     prisma.reservation.findMany({
       take: 5,
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: 'desc' },
       include: {
         user: true,
         car: true,
       },
     }),
-  ]);
+  ])
 
   return {
     totalUsers,
@@ -43,17 +43,17 @@ async function getAdminStats() {
     pendingReservations,
     totalRevenue: totalRevenue._sum.totalPrice || 0,
     recentActivities,
-  };
+  }
 }
 
 export default async function AdminDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return notFound();
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return notFound()
   }
 
-  const stats = await getAdminStats();
+  const stats = await getAdminStats()
 
   return (
     <PageContainer className="p-0">
@@ -138,5 +138,5 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
     </PageContainer>
-  );
+  )
 }

@@ -5,8 +5,8 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { Role } from '@/types'
 
-// Export authOptions directly as a constant
-export const authOptions = {
+// Define the configuration without exporting it
+const config: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -63,9 +63,14 @@ export const authOptions = {
   session: {
     strategy: 'jwt',
   },
-} satisfies NextAuthOptions
+} as const
 
-// Create and export the handler
-const handler = NextAuth(authOptions)
+// Create the handler with the config
+const handler = NextAuth(config)
+
+// Only export the route handlers
 export const GET = handler
 export const POST = handler
+
+// Export the config through a default export
+export default config

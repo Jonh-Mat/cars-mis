@@ -1,17 +1,17 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { notFound } from "next/navigation";
-import CarCreateForm from "@/components/CarCreateForm";
-import { PageHeader } from "@/components/PageHeaders";
-import { PageContainer } from "@/components/ui/PageContainer";
+import { getServerSession } from 'next-auth/next'
+import authOptions from '@/app/api/auth/[...nextauth]/route'
+import { notFound } from 'next/navigation'
+import CarCreateForm from '@/components/CarCreateForm'
+import { PageHeader } from '@/components/PageHeaders'
+import { PageContainer } from '@/components/ui/PageContainer'
 
 export default async function CarCreatePage() {
-  const session = await getServerSession(authOptions);
-  const currentDate = "2025-02-19 16:14:51";
-  const userName = "Jonh-Mat";
+  const session = await getServerSession(authOptions)
+  const currentDate = '2025-02-19 16:14:51'
+  const userName = 'Jonh-Mat'
 
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return notFound();
+  if (!session?.user || session.user.role !== 'ADMIN') {
+    return notFound()
   }
 
   return (
@@ -32,5 +32,5 @@ export default async function CarCreatePage() {
         </div>
       </div>
     </PageContainer>
-  );
+  )
 }

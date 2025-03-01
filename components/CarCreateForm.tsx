@@ -1,91 +1,91 @@
-"use client";
+'use client'
 
-import { TransmissionType, DriveType } from "@prisma/client";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import toast from "react-hot-toast";
-import { Button } from "./ui/button";
-import { FormInput } from "./ui/form-input";
-import { FormSelect } from "./ui/form-select";
-import { cn } from "@/lib/utils";
+import { TransmissionType, DriveType } from '@prisma/client'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import toast from 'react-hot-toast'
+import { Button } from './ui/button'
+import { FormInput } from './ui/form-input'
+import { FormSelect } from './ui/form-select'
+import { cn } from '@/lib/utils'
 
 export default function CarCreateForm() {
-  const router = useRouter();
-  const [isLoading, setIsLoasding] = useState(false);
-  const [error, setError] = useState("");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const router = useRouter()
+  const [isLoading, setIsLoasding] = useState(false)
+  const [error, setError] = useState('')
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
+      setImageFile(file)
+      const reader = new FileReader()
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoasding(true);
-    setError("");
+    e.preventDefault()
+    setIsLoasding(true)
+    setError('')
 
     try {
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData(e.currentTarget)
 
       //if we have an image file, upload it first
-      let imageUrl = null;
+      let imageUrl = null
       if (imageFile) {
-        const imageFormData = new FormData();
-        imageFormData.append("file", imageFile);
+        const imageFormData = new FormData()
+        imageFormData.append('file', imageFile)
 
-        const imageUploadRes = await fetch("/api/upload", {
-          method: "POST",
+        const imageUploadRes = await fetch('/api/upload', {
+          method: 'POST',
           body: imageFormData,
-        });
+        })
 
-        if (!imageUploadRes.ok) throw new Error("Failed to upload image");
-        const imageData = await imageUploadRes.json();
-        imageUrl = imageData.url;
+        if (!imageUploadRes.ok) throw new Error('Failed to upload image')
+        const imageData = await imageUploadRes.json()
+        imageUrl = imageData.url
       }
 
       // Create the car with all details including te image URL
       const carData = {
-        make: formData.get("make"),
-        model: formData.get("model"),
-        year: parseInt(formData.get("year") as string),
-        color: formData.get("color"),
-        transmission: formData.get("transmission"),
-        driveType: formData.get("driveType"),
-        fuelEfficiency: parseFloat(formData.get("fuelEfficiency") as string),
-        pricePerDay: parseFloat(formData.get("pricePerDay") as string),
+        make: formData.get('make'),
+        model: formData.get('model'),
+        year: parseInt(formData.get('year') as string),
+        color: formData.get('color'),
+        transmission: formData.get('transmission'),
+        driveType: formData.get('driveType'),
+        fuelEfficiency: parseFloat(formData.get('fuelEfficiency') as string),
+        pricePerDay: parseFloat(formData.get('pricePerDay') as string),
         imageUrl,
         isAvailable: true,
-      };
+      }
 
-      const response = await fetch("/api/cars", {
-        method: "POST",
+      const response = await fetch('/api/cars', {
+        method: 'POST',
         headers: {
-          "content-Type": "application/json",
+          'content-Type': 'application/json',
         },
         body: JSON.stringify(carData),
-      });
+      })
 
-      if (!response.ok) throw new Error("Failed to create car");
+      if (!response.ok) throw new Error('Failed to create car')
 
-      router.push("/dashboard");
-      toast.success("Car created successfully");
-      router.refresh();
+      router.push('/dashboard')
+      toast.success('Car created successfully')
+      router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : 'Something went wrong')
     } finally {
-      setIsLoasding(false);
+      setIsLoasding(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-8">
@@ -112,12 +112,12 @@ export default function CarCreateForm() {
           </div>
           <div
             className={cn(
-              "mt-1 flex justify-center px-6 pt-5 pb-6",
-              "border-2 border-dashed rounded-xl",
-              "border-gray-200 dark:border-navy-700",
-              "hover:border-blue-500 dark:hover:border-blue-400",
-              "transition-colors",
-              "bg-gray-50 dark:bg-navy-900/50"
+              'mt-1 flex justify-center px-6 pt-5 pb-6',
+              'border-2 border-dashed rounded-xl',
+              'border-gray-200 dark:border-navy-700',
+              'hover:border-blue-500 dark:hover:border-blue-400',
+              'transition-colors',
+              'bg-gray-50 dark:bg-navy-900/50'
             )}
           >
             <div className="space-y-3 text-center">
@@ -127,14 +127,14 @@ export default function CarCreateForm() {
                     src={imagePreview}
                     alt="Preview"
                     fill
-                    style={{ objectFit: "contain" }}
+                    style={{ objectFit: 'contain' }}
                     className="rounded-lg"
                   />
                   <button
                     type="button"
                     onClick={() => {
-                      setImagePreview(null);
-                      setImageFile(null);
+                      setImagePreview(null)
+                      setImageFile(null)
                     }}
                     className="absolute top-2 right-2 p-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
                   >
@@ -176,12 +176,12 @@ export default function CarCreateForm() {
               <div className="flex justify-center text-sm">
                 <label
                   className={cn(
-                    "relative cursor-pointer rounded-md font-medium",
-                    "text-blue-600 dark:text-blue-400",
-                    "hover:text-blue-500 dark:hover:text-blue-300",
-                    "focus-within:outline-none focus-within:ring-2",
-                    "focus-within:ring-blue-500 dark:focus-within:ring-blue-400",
-                    "focus-within:ring-offset-2"
+                    'relative cursor-pointer rounded-md font-medium',
+                    'text-blue-600 dark:text-blue-400',
+                    'hover:text-blue-500 dark:hover:text-blue-300',
+                    'focus-within:outline-none focus-within:ring-2',
+                    'focus-within:ring-blue-500 dark:focus-within:ring-blue-400',
+                    'focus-within:ring-offset-2'
                   )}
                 >
                   <span>Upload a file</span>
@@ -199,7 +199,7 @@ export default function CarCreateForm() {
               </p>
             </div>
           </div>
-        </div>{" "}
+        </div>{' '}
         {/* Basic Information */}
         <div>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -292,11 +292,11 @@ export default function CarCreateForm() {
                 <span>Creating...</span>
               </div>
             ) : (
-              "Create Car"
+              'Create Car'
             )}
           </Button>
         </div>
       </form>
     </div>
-  );
+  )
 }

@@ -1,16 +1,16 @@
-import Link from "next/link";
-import Image from "next/image";
-import { getServerSession } from "next-auth/next";
-import { redirect } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { authOptions } from "./api/auth/[...nextauth]/route";
+import Link from 'next/link'
+import Image from 'next/image'
+import { getServerSession } from 'next-auth/next'
+import { redirect } from 'next/navigation'
+import { cn } from '@/lib/utils'
+import authOptions from './api/auth/[...nextauth]/route'
 
 export default async function HomePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
   // Redirect to dashboard if already logged in
   if (session) {
-    redirect("/dashboard");
+    redirect('/dashboard')
   }
 
   return (
@@ -41,14 +41,14 @@ export default async function HomePage() {
                   <Link
                     href="/signin"
                     className={cn(
-                      "flex items-center justify-center gap-2",
-                      "px-6 py-3 rounded-xl",
-                      "bg-white dark:bg-navy-800",
-                      "text-blue-600 dark:text-blue-400",
-                      "font-semibold text-lg",
-                      "transition duration-200",
-                      "hover:bg-gray-50 dark:hover:bg-navy-700",
-                      "focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      'flex items-center justify-center gap-2',
+                      'px-6 py-3 rounded-xl',
+                      'bg-white dark:bg-navy-800',
+                      'text-blue-600 dark:text-blue-400',
+                      'font-semibold text-lg',
+                      'transition duration-200',
+                      'hover:bg-gray-50 dark:hover:bg-navy-700',
+                      'focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400'
                     )}
                   >
                     <svg
@@ -69,15 +69,15 @@ export default async function HomePage() {
                   <Link
                     href="/signup"
                     className={cn(
-                      "flex items-center justify-center gap-2",
-                      "px-6 py-3 rounded-xl",
-                      "bg-transparent",
-                      "text-white",
-                      "font-semibold text-lg",
-                      "border-2 border-white",
-                      "transition duration-200",
-                      "hover:bg-white/10",
-                      "focus:outline-none focus:ring-2 focus:ring-white"
+                      'flex items-center justify-center gap-2',
+                      'px-6 py-3 rounded-xl',
+                      'bg-transparent',
+                      'text-white',
+                      'font-semibold text-lg',
+                      'border-2 border-white',
+                      'transition duration-200',
+                      'hover:bg-white/10',
+                      'focus:outline-none focus:ring-2 focus:ring-white'
                     )}
                   >
                     <svg
@@ -116,8 +116,8 @@ export default async function HomePage() {
                           />
                         </svg>
                       ),
-                      title: "Quick Booking",
-                      description: "Book your car in minutes",
+                      title: 'Quick Booking',
+                      description: 'Book your car in minutes',
                     },
                     {
                       icon: (
@@ -135,8 +135,8 @@ export default async function HomePage() {
                           />
                         </svg>
                       ),
-                      title: "24/7 Support",
-                      description: "Always here to help you",
+                      title: '24/7 Support',
+                      description: 'Always here to help you',
                     },
                   ].map((feature) => (
                     <div
@@ -164,7 +164,7 @@ export default async function HomePage() {
                     src="/cars/heroo.png"
                     alt="Featured Car"
                     fill
-                    style={{ objectFit: "contain" }}
+                    style={{ objectFit: 'contain' }}
                     priority
                     sizes="(max-width: 768px) 100vw, 50vw"
                     className="animate-bounce-soft drop-shadow-2xl"
@@ -176,5 +176,5 @@ export default async function HomePage() {
         </div>
       </div>
     </div>
-  );
+  )
 }
