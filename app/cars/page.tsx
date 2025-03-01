@@ -1,16 +1,16 @@
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]/route";
-import { prisma } from "@/lib/prisma";
-import CarCard from "@/components/CarCard";
-import { notFound } from "next/navigation";
-import { BackButton } from "@/components/BackButton";
-import SearchBar from "@/components/SearchBar";
-import { Prisma } from "@prisma/client";
-import { PageContainer } from "@/components/ui/PageContainer";
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
+import CarCard from '@/components/CarCard'
+import { notFound } from 'next/navigation'
+import { BackButton } from '@/components/BackButton'
+import SearchBar from '@/components/SearchBar'
+import { Prisma } from '@prisma/client'
+import { PageContainer } from '@/components/ui/PageContainer'
 
 type SearchParams = {
-  search?: string;
-};
+  search?: string
+}
 
 // Get user's rented cars
 async function getUserRentedCars(userId: string) {
@@ -21,7 +21,7 @@ async function getUserRentedCars(userId: string) {
           some: {
             userId: userId,
             status: {
-              in: ["CONFIRMED", "PENDING"],
+              in: ['CONFIRMED', 'PENDING'],
             },
             endDate: {
               gte: new Date(),
@@ -34,11 +34,11 @@ async function getUserRentedCars(userId: string) {
           where: {
             userId: userId,
             status: {
-              in: ["CONFIRMED", "PENDING"],
+              in: ['CONFIRMED', 'PENDING'],
             },
           },
           orderBy: {
-            createdAt: "desc",
+            createdAt: 'desc',
           },
           select: {
             status: true,
@@ -49,17 +49,17 @@ async function getUserRentedCars(userId: string) {
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
-    });
+    })
 
     return rentedCars.map((car) => ({
       ...car,
       pricePerDay: car.pricePerDay.toString(),
-    }));
+    }))
   } catch (error) {
-    console.error("Error fetching rented cars:", error);
-    return [];
+    console.error('Error fetching rented cars:', error)
+    return []
   }
 }
 
@@ -74,20 +74,20 @@ async function getCars(search?: string) {
                 {
                   make: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
                 {
                   model: {
                     contains: search,
-                    mode: "insensitive",
+                    mode: 'insensitive',
                   },
                 },
               ],
             }
           : {},
       ],
-    };
+    }
 
     const cars = await prisma.car.findMany({
       where,
@@ -95,10 +95,10 @@ async function getCars(search?: string) {
         reservations: {
           where: {
             OR: [
-              { status: "CONFIRMED" },
+              { status: 'CONFIRMED' },
               {
                 AND: [
-                  { status: "PENDING" },
+                  { status: 'PENDING' },
                   {
                     createdAt: {
                       gte: new Date(Date.now() - 30 * 60 * 1000), // Last 30 minutes
@@ -115,63 +115,63 @@ async function getCars(search?: string) {
             endDate: true,
           },
           orderBy: {
-            createdAt: "desc",
+            createdAt: 'desc',
           },
         },
       },
       orderBy: {
-        createdAt: "desc",
+        createdAt: 'desc',
       },
-    });
+    })
 
     // Filter available cars
     const availableCars = cars.filter((car) => {
       const hasConfirmedReservation = car.reservations.some(
-        (res) => res.status === "CONFIRMED"
-      );
+        (res) => res.status === 'CONFIRMED'
+      )
 
       const hasPendingReservation = car.reservations.some((res) => {
-        if (res.status === "PENDING") {
+        if (res.status === 'PENDING') {
           const minutesAgo =
             (new Date().getTime() - new Date(res.createdAt).getTime()) /
             1000 /
-            60;
-          return minutesAgo < 30;
+            60
+          return minutesAgo < 30
         }
-        return false;
-      });
+        return false
+      })
 
-      return !hasConfirmedReservation && !hasPendingReservation;
-    });
+      return !hasConfirmedReservation && !hasPendingReservation
+    })
 
     return availableCars.map((car) => ({
       ...car,
       pricePerDay: car.pricePerDay.toString(),
-    }));
+    }))
   } catch (error) {
-    console.error("Error fetching cars:", error);
-    return [];
+    console.error('Error fetching cars:', error)
+    return []
   }
 }
 
 export default async function CarsPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: SearchParams
 }) {
-  const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
   if (!session?.user) {
-    return notFound();
+    return notFound()
   }
 
   const [rentedCars, availableCars] = await Promise.all([
     getUserRentedCars(session.user.id),
     getCars(searchParams.search),
-  ]);
+  ])
 
-  const currentDate = new Date().toISOString().slice(0, 19).replace("T", " ");
-  const userName = session.user.name || session.user.email || "Unknown User";
+  const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ')
+  const userName = session.user.name || session.user.email || 'Unknown User'
 
   return (
     <PageContainer>
@@ -304,7 +304,7 @@ export default async function CarsPage({
                   No cars found matching your search.
                 </p>
                 <button
-                  onClick={() => (window.location.href = "/cars")}
+                  onClick={() => (window.location.href = '/cars')}
                   className="text-blue-600 dark:text-blue-400 hover:underline"
                 >
                   Clear search
@@ -315,5 +315,5 @@ export default async function CarsPage({
         </section>
       </div>
     </PageContainer>
-  );
+  )
 }
