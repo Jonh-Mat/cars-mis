@@ -39,7 +39,7 @@ export default async function HomePage() {
                 {/* Auth Buttons */}
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Link
-                    href="/signin"
+                    href="/auth/signin"
                     className={cn(
                       'flex items-center justify-center gap-2',
                       'px-6 py-3 rounded-xl',
@@ -67,7 +67,7 @@ export default async function HomePage() {
                     Sign In
                   </Link>
                   <Link
-                    href="/signup"
+                    href="/auth/signup"
                     className={cn(
                       'flex items-center justify-center gap-2',
                       'px-6 py-3 rounded-xl',
