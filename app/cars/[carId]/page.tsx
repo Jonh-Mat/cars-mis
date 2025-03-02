@@ -8,45 +8,16 @@ import { BackButton } from '@/components/BackButton'
 import { cn } from '@/lib/utils'
 import { PageContainer } from '@/components/ui/PageContainer'
 import { Metadata } from 'next'
-import { SearchParams } from 'next/dist/server/request/search-params'
+import type { ResolvingMetadata } from 'next'
 
-// Define a base Promise-like interface
-interface PromiseLike<T> extends Promise<T> {
-  then<TResult1 = T, TResult2 = never>(
-    onfulfilled?:
-      | ((value: T) => TResult1 | PromiseLike<TResult1>)
-      | undefined
-      | null,
-    onrejected?:
-      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
-      | undefined
-      | null
-  ): Promise<TResult1 | TResult2>
-}
+// Define the base types
+type CarParams = { carId: string }
+type SearchParamsType = { [key: string]: string | string[] | undefined }
 
-// Define the params type
-interface Params extends PromiseLike<any> {
-  carId: string
-}
-
-// Define searchParams type
-interface PromiseLike<T> {
-  then<TResult1 = T, TResult2 = never>(
-    onfulfilled?:
-      | ((value: T) => TResult1 | PromiseLike<TResult1>)
-      | undefined
-      | null,
-    onrejected?:
-      | ((reason: any) => TResult2 | PromiseLike<TResult2>)
-      | undefined
-      | null
-  ): PromiseLike<TResult1 | TResult2>
-}
-
-// Define the page props
-interface PageProps {
-  params: Params
-  searchParams?: SearchParams
+// Make both params and searchParams Promise-like
+type Props = {
+  params: CarParams & Promise<CarParams>
+  searchParams: SearchParamsType & Promise<SearchParamsType>
 }
 
 async function getCarById(carId: string) {
@@ -76,9 +47,11 @@ async function getCarById(carId: string) {
   }
 }
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata(
+  { params }: Props,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _parent: ResolvingMetadata
+): Promise<Metadata> {
   const car = await getCarById(params.carId)
   return {
     title: car ? `Reserve ${car.make} ${car.model}` : 'Car Not Found',
@@ -88,10 +61,7 @@ export async function generateMetadata({
   }
 }
 
-export default async function CarDetailsPage({
-  params,
-  searchParams,
-}: PageProps) {
+export default async function CarDetailsPage({ params }: Props) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
@@ -106,7 +76,6 @@ export default async function CarDetailsPage({
 
   return (
     <PageContainer className="max-w-4xl mx-auto">
-      {/* Rest of your component remains exactly the same */}
       <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-navy-900/50 rounded-xl border border-gray-200 dark:border-navy-700">
         <BackButton />
         <div>
@@ -120,7 +89,6 @@ export default async function CarDetailsPage({
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {/* Car Image and Details */}
         <div className="space-y-6">
           <div className="relative h-64 rounded-xl overflow-hidden bg-gray-100 dark:bg-navy-900/50">
             <Image
@@ -165,7 +133,6 @@ export default async function CarDetailsPage({
           </div>
         </div>
 
-        {/* Reservation Form */}
         <ReservationForm
           carId={car.id}
           priceParDay={parseFloat(car.pricePerDay)}

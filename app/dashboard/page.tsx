@@ -11,6 +11,12 @@ import Loading from '@/components/Loading'
 import { SearchParamsType } from '@/types'
 import { cn } from '@/lib/utils'
 
+export const dynamic = 'force-dynamic'
+
+type Props = {
+  searchParams: SearchParamsType & Promise<SearchParamsType>
+}
+
 // Helper function to safely parse search params
 function parseSearchParams(searchParams: SearchParamsType) {
   return {
@@ -26,7 +32,6 @@ function parseSearchParams(searchParams: SearchParamsType) {
 }
 
 async function getCars(searchParams: SearchParamsType) {
-  // Parse search params safely
   const { make, model, minPrice, maxPrice, transmission, year, page, limit } =
     parseSearchParams(searchParams)
 
@@ -207,15 +212,23 @@ async function getDashboardStats(): Promise<DashboardStats> {
   }
 }
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: SearchParamsType
-}) {
+export default async function DashboardPage({ searchParams }: Props) {
   try {
+    // Extract regular search params from Promise-like object
+    const regularSearchParams: SearchParamsType = {
+      make: searchParams.make,
+      model: searchParams.model,
+      minPrice: searchParams.minPrice,
+      maxPrice: searchParams.maxPrice,
+      transmission: searchParams.transmission,
+      year: searchParams.year,
+      page: searchParams.page,
+      limit: searchParams.limit,
+    }
+
     const [session, { cars, pages }, stats] = await Promise.all([
       getServerSession(authOptions),
-      getCars(searchParams),
+      getCars(regularSearchParams),
       getDashboardStats(),
     ])
 
@@ -350,12 +363,14 @@ export default async function DashboardPage({
                         key={pageNum}
                         href={{
                           pathname: '/dashboard',
-                          query: { ...searchParams, page: pageNum },
+                          query: { ...regularSearchParams, page: pageNum },
                         }}
                         className={cn(
                           'px-4 py-2 rounded-lg transition-colors',
                           pageNum ===
-                            parseInt(searchParams.page?.toString() || '1')
+                            parseInt(
+                              regularSearchParams.page?.toString() || '1'
+                            )
                             ? 'bg-blue-600 dark:bg-blue-700 text-white'
                             : 'bg-white dark:bg-navy-800 text-gray-700 dark:text-gray-300',
                           'hover:bg-gray-50 dark:hover:bg-navy-700'

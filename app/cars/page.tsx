@@ -7,11 +7,20 @@ import { BackButton } from '@/components/BackButton'
 import SearchBar from '@/components/SearchBar'
 import { Prisma } from '@prisma/client'
 import { PageContainer } from '@/components/ui/PageContainer'
+import { Metadata } from 'next'
 
-type SearchParams = {
-  search?: string
+// Define base type for searchParams
+type SearchParamsType = { [key: string]: string | string[] | undefined }
+
+// Make searchParams Promise-like using intersection type
+type Props = {
+  searchParams: SearchParamsType & Promise<SearchParamsType>
 }
 
+export const metadata: Metadata = {
+  title: 'Available Cars',
+  description: 'Browse and reserve available cars',
+}
 // Get user's rented cars
 async function getUserRentedCars(userId: string) {
   try {
@@ -154,11 +163,7 @@ async function getCars(search?: string) {
   }
 }
 
-export default async function CarsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams
-}) {
+export default async function CarsPage({ searchParams }: Props) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
@@ -167,7 +172,7 @@ export default async function CarsPage({
 
   const [rentedCars, availableCars] = await Promise.all([
     getUserRentedCars(session.user.id),
-    getCars(searchParams.search),
+    getCars(searchParams.search?.toString()),
   ])
 
   const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ')
